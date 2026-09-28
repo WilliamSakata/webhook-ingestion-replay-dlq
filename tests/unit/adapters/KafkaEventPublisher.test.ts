@@ -46,7 +46,7 @@ describe('KafkaEventPublisher', () => {
     });
 
     // give the consumer group a moment to finish joining before publishing
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
 
     await publisher.publish({ eventId: 'evt_test_1', paymentId: 'pay_1', type: 'payment.succeeded' });
 
