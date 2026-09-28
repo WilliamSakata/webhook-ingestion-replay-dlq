@@ -53,8 +53,15 @@ export class PostgresDlqRepository implements DlqRepositoryPort {
   }
 
   async get(id: string): Promise<DlqEntry | null> {
-    const result = await this.pool.query<DlqRow>(`SELECT * FROM dlq_events WHERE id = $1`, [id]);
-    return result.rows[0] ? toDlqEntry(result.rows[0]) : null;
+    try {
+      const result = await this.pool.query<DlqRow>(`SELECT * FROM dlq_events WHERE id = $1`, [id]);
+      return result.rows[0] ? toDlqEntry(result.rows[0]) : null;
+    } catch (error) {
+      if (error instanceof Error && 'code' in error && (error as { code: string }).code === '22P02') {
+        return null;
+      }
+      throw error;
+    }
   }
 
   async markReprocessed(id: string): Promise<void> {

@@ -9,6 +9,10 @@ export function createDlqRouter(dlqRepository: DlqRepositoryPort, reprocessDlqEv
     try {
       const limit = typeof req.query.limit === 'string' ? Number(req.query.limit) : 20;
       const offset = typeof req.query.offset === 'string' ? Number(req.query.offset) : 0;
+      if (!Number.isFinite(limit) || limit < 0 || !Number.isFinite(offset) || offset < 0) {
+        res.status(400).json({ error: 'invalid limit or offset' });
+        return;
+      }
       const entries = await dlqRepository.list({ limit, offset });
       res.status(200).json({ entries });
     } catch (error) {

@@ -84,6 +84,12 @@ describe('PostgresDlqRepository', () => {
 
     expect(await repo.get('00000000-0000-0000-0000-000000000000')).toBeNull();
   });
+
+  it('returns null from get for a malformed, non-UUID id instead of throwing', async () => {
+    const repo = new PostgresDlqRepository(pool);
+
+    expect(await repo.get('not-a-valid-uuid')).toBeNull();
+  });
 });
 
 describe('PostgresReconciliationCursorRepository', () => {

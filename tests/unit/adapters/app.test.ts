@@ -97,6 +97,15 @@ describe('GET /dlq and POST /dlq/:id/reprocess', () => {
 
     expect(response.status).toBe(404);
   });
+
+  it('returns 400 for an invalid limit query parameter', async () => {
+    const { app } = buildApp();
+
+    const response = await request(app).get('/dlq?limit=abc');
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({ error: 'invalid limit or offset' });
+  });
 });
 
 describe('POST /reconciliation/run', () => {
