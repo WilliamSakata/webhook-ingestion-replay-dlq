@@ -1,6 +1,6 @@
 # Webhook Ingestion with Replay and DLQ
 
-> Status: 🚧 planned — not yet implemented
+> Status: ✅ implemented
 
 ## Goal
 
@@ -61,6 +61,14 @@ Reprocessing a DLQ entry:
 ```bash
 curl -X POST http://localhost:3000/dlq/<id>/reprocess
 ```
+
+Reprocessing republishes the DLQ entry's stored payload as-is — it does not modify or "fix" it. If the underlying cause of the original failure is still present (e.g. the payload still contains the `pay_fail_demo` magic trigger), reprocessing will simply fail again: the original entry is marked reprocessed, but a brand new DLQ entry is created for the same reason, which can look confusing if you were expecting a clean success. To see a successful replay, first edit the stored payload so the failure trigger is gone, for example via psql:
+
+```sql
+UPDATE dlq_events SET payload = '{"eventId":"evt_demo_2","paymentId":"pay_demo_2","type":"payment.succeeded"}' WHERE id = '<id>';
+```
+
+...then call the reprocess endpoint again. This exact fix-then-replay sequence is what `tests/integration/dlqReplayFlow.test.ts` demonstrates end to end.
 
 Triggering reconciliation on demand:
 
