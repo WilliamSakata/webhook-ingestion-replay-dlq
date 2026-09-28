@@ -43,7 +43,7 @@ export class ReconcilePayments {
         lastCursor = page.nextCursor;
       }
 
-      if (page.events.length < this.pageSize) {
+      if (page.nextCursor === null || page.events.length < this.pageSize) {
         break;
       }
 

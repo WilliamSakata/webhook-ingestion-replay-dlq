@@ -65,4 +65,18 @@ describe('ReconcilePayments', () => {
     expect(eventPublisher.published).toEqual([event1, event2]);
     expect((await cursorRepository.load())?.cursor).toBe('c2');
   });
+
+  it('stops after a full page whose nextCursor is null, instead of looping forever', async () => {
+    const partnerEventsApi = new FakePartnerEventsApiPort({
+      c1: { events: [event2], nextCursor: null },
+    });
+    const eventPublisher = new FakeEventPublisherPort();
+    const cursorRepository = new FakeReconciliationCursorPort({ cursor: 'c1', updatedAt: new Date() });
+    const useCase = new ReconcilePayments(partnerEventsApi, eventPublisher, cursorRepository, { pageSize: 1 });
+
+    await useCase.execute();
+
+    expect(eventPublisher.published).toEqual([event2]);
+    expect((await cursorRepository.load())?.cursor).toBe('c1');
+  });
 });
